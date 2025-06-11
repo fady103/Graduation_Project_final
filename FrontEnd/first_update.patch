@@ -1,0 +1,634 @@
+Subject: [PATCH] first update
+---
+Index: lib/xray_page.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/xray_page.dart b/lib/xray_page.dart
+--- a/lib/xray_page.dart	(revision f038e1a45d9055f7518dec6c088e16bdaafb2506)
++++ b/lib/xray_page.dart	(date 1749030263766)
+@@ -55,32 +55,59 @@
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(title: Text(widget.title)),
+-      body: Padding(
+-        padding: const EdgeInsets.all(20),
+-        child: Column(
+-          children: [
++      body: Container(
++      width: double.infinity,
++      height: double.infinity,
++      decoration: const BoxDecoration(
++        gradient: LinearGradient(
++          begin: Alignment.topCenter,
++          end: Alignment.bottomCenter,
++          colors: [
++            Color(0xFFFCE4EC),
++            Color(0xFFF8BBD0),
++          ],
++        ),
++      ),
++      child: SafeArea(
++          child: Padding(
++              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
++              child: Column(
++                crossAxisAlignment: CrossAxisAlignment.center,
++                children: [
+             ElevatedButton.icon(
+               onPressed: _pickImage,
+               icon: const Icon(Icons.image),
+-              label: const Text("اختيار صورة أشعة"),
++              label: const Text("Choose Image"),
++
+             ),
+-            const SizedBox(height: 20),
+-            if (_selectedImage != null)
+-              Image.file(
+-                File(_selectedImage!.path),
+-                height: 250,
+-                fit: BoxFit.contain,
++    const SizedBox(height: 20),
++    // خلي الصورة تاخد أكبر مساحة ممكن
++            Expanded(
++              child: Center(
++                child: _selectedImage != null
++                    ? Image.file(
++                  File(_selectedImage!.path),
++                  fit: BoxFit.contain,
++                  width: double.infinity,
++                )
++                    : const Text(
++                    "NO IMAGE YET",
++                    style: TextStyle(fontSize: 30, color: Colors.black, fontWeight: FontWeight.bold),
++                ),
+               ),
+-            const SizedBox(height: 20),
+-            ElevatedButton.icon(
+-              onPressed: _sendXray,
+-              icon: const Icon(Icons.send),
+-              label: const Text("إرسال صورة الأشعة"),
+-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+-            ),
+-          ],
+-        ),
++            ),
++                  const SizedBox(height: 20),
++                  ElevatedButton.icon(
++                    onPressed: _sendXray,
++                    icon: const Icon(Icons.send),
++                    label: const Text("Send"),
++                    style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFFCE4EC)),
++                  ),
++                ],
++              ),
++          ),
+       ),
++      ),
+     );
+   }
+-}
+\ No newline at end of file
++}
+Index: lib/medical_test_page.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/medical_test_page.dart b/lib/medical_test_page.dart
+--- a/lib/medical_test_page.dart	(revision f038e1a45d9055f7518dec6c088e16bdaafb2506)
++++ b/lib/medical_test_page.dart	(date 1749029981622)
+@@ -24,7 +24,7 @@
+     switch (widget.title) {
+       case "Diabetes":
+         fields = [
+-          "gender", "age", "hypertension", "heart disease", "smoking history",
++          "gender", ("age"), "hypertension", "heart disease", "smoking history",
+           "bmi", "HbA1c level", "blood glucose level"
+         ];
+         break;
+@@ -102,10 +102,21 @@
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(title: Text(widget.title)),
+-      body: Padding(
+-        padding: const EdgeInsets.all(16),
+-        child: Column(
+-          children: [
++      body: Container(
++        decoration: const BoxDecoration(
++          gradient: LinearGradient(
++            begin: Alignment.topCenter,
++            end: Alignment.bottomCenter,
++            colors: [
++              Color(0xFFF1F8E9),
++              Color(0xFFE8F5E9),
++            ],
++          ),
++        ),
++        child: Padding(
++          padding: const EdgeInsets.all(16),
++          child: Column(
++            children: [
+             Expanded(
+               child: ListView.builder(
+                 itemCount: fields.length,
+@@ -149,9 +160,9 @@
+             ElevatedButton.icon(
+               onPressed: _sendDataToBackend,
+               icon: const Icon(Icons.send),
+-              label: const Text("إرسال البيانات"),
++              label: const Text("Send"),
+               style: ElevatedButton.styleFrom(
+-                backgroundColor: Colors.deepPurple,
++                backgroundColor: Colors.deepPurple.shade400,
+                 foregroundColor: Colors.white,
+                 padding:
+                 const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+@@ -160,6 +171,7 @@
+           ],
+         ),
+       ),
++    ),
+     );
+   }
+ }
+Index: lib/main_app_bar.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/main_app_bar.dart b/lib/main_app_bar.dart
+new file mode 100644
+--- /dev/null	(date 1749025764189)
++++ b/lib/main_app_bar.dart	(date 1749025764189)
+@@ -0,0 +1,43 @@
++//main_app_bar
++import 'package:flutter/material.dart';
++import 'settings_page.dart';
++
++class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
++  final String title;
++  final VoidCallback? onSettingsPressed;
++  final List<Widget>? actions;
++
++  const MainAppBar({
++    Key? key,
++    required this.title,
++    this.onSettingsPressed,
++    this.actions,
++  }) : super(key: key);
++
++  @override
++  Widget build(BuildContext context) {
++    return AppBar(
++      leading: IconButton(
++        icon: const Icon(Icons.settings),
++        onPressed: onSettingsPressed ?? () {
++          ScaffoldMessenger.of(context).showSnackBar(
++            const SnackBar(content: Text("فتح الإعدادات")),
++          );
++        },
++      ),
++      title: Center(
++        child: Text(
++          title,
++          style: const TextStyle(fontWeight: FontWeight.bold),
++        ),
++      ),
++      actions: actions ?? [const SizedBox(width: 48)], // علشان التوازن
++      backgroundColor: Colors.white,
++      foregroundColor: Colors.black,
++      elevation: 2,
++    );
++  }
++
++  @override
++  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
++}
+Index: lib/results_page.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/results_page.dart b/lib/results_page.dart
+--- a/lib/results_page.dart	(revision f038e1a45d9055f7518dec6c088e16bdaafb2506)
++++ b/lib/results_page.dart	(date 1748980257358)
+@@ -1,3 +1,4 @@
++// results_page.dart
+ import 'package:flutter/material.dart';
+ 
+ class ResultsPage extends StatelessWidget {
+@@ -7,68 +8,97 @@
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final values = data["values"] as Map<String, String>? ?? {};
+-    final diagnosis = data["diagnosis"] ?? "لا توجد نتائج";
+-    final testType = data["testType"] ?? "";
++    final String testType = data["testType"] ?? "Unknown Test";
++    final Map<String, String> values = Map<String, String>.from(data["values"] ?? {});
++    final String diagnosis = data["diagnosis"] ?? "No diagnosis available";
+ 
+     return Scaffold(
+-      appBar: AppBar(title: Text("نتائج $testType")),
++      appBar: AppBar(
++        title: Text(testType),
++        backgroundColor: const Color(0xFFE3F2FD),
++        foregroundColor: const Color(0xFF0D47A1),
++        elevation: 0,
++      ),
+       body: Container(
+-        decoration: BoxDecoration(
++        decoration: const BoxDecoration(
+           gradient: LinearGradient(
+-            colors: [Colors.deepPurple.shade200, Colors.deepPurple.shade50],
+-            begin: Alignment.topLeft,
+-            end: Alignment.bottomRight,
++            begin: Alignment.topCenter,
++            end: Alignment.bottomCenter,
++            colors: [
++              Color(0xFFF1F8E9),
++              Color(0xFFE8F5E9),
++            ],
+           ),
+         ),
+         padding: const EdgeInsets.all(16),
+-        child: SingleChildScrollView(
+-          child: Card(
+-            color: Colors.white.withOpacity(0.9),
+-            elevation: 6,
+-            shape:
+-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+-            child: Padding(
+-              padding: const EdgeInsets.all(16),
+-              child: Column(
+-                crossAxisAlignment: CrossAxisAlignment.start,
+-                children: [
+-                  Text(
+-                    "تحليل: $testType",
+-                    style: const TextStyle(
+-                      fontSize: 22,
+-                      fontWeight: FontWeight.bold,
+-                      color: Colors.deepPurple,
+-                    ),
+-                  ),
+-                  const SizedBox(height: 10),
+-                  const Text(
+-                    "القيم المدخلة:",
+-                    style: TextStyle(fontWeight: FontWeight.w600),
+-                  ),
+-                  const SizedBox(height: 8),
+-                  ...values.entries.map((e) => Padding(
+-                    padding: const EdgeInsets.symmetric(vertical: 2),
+-                    child: Text("${e.key}: ${e.value}"),
+-                  )),
+-                  const SizedBox(height: 20),
+-                  const Text(
+-                    "التشخيص:",
+-                    style: TextStyle(
+-                      fontWeight: FontWeight.bold,
+-                      fontSize: 18,
+-                      color: Colors.deepPurple,
+-                    ),
+-                  ),
+-                  const SizedBox(height: 8),
+-                  Text(
+-                    diagnosis,
+-                    style: const TextStyle(fontSize: 16),
+-                  ),
+-                ],
++        child: Column(
++          crossAxisAlignment: CrossAxisAlignment.start,
++          children: [
++            Text(
++              "نتائج التحليل:",
++              style: TextStyle(
++                fontSize: 20,
++                fontWeight: FontWeight.bold,
++                color: Colors.green.shade900,
++              ),
++            ),
++            const SizedBox(height: 12),
++            Expanded(
++              child: ListView.separated(
++                itemCount: values.length,
++                separatorBuilder: (_, __) => const Divider(color: Colors.grey),
++                itemBuilder: (context, index) {
++                  String key = values.keys.elementAt(index);
++                  String value = values[key]!;
++                  return Row(
++                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
++                    children: [
++                      Text(
++                        key,
++                        style: TextStyle(
++                          fontSize: 16,
++                          color: Colors.green.shade700,
++                          fontWeight: FontWeight.w600,
++                        ),
++                      ),
++                      Text(
++                        value,
++                        style: TextStyle(
++                          fontSize: 16,
++                          color: Colors.black87,
++                        ),
++                      ),
++                    ],
++                  );
++                },
++              ),
++            ),
++            const SizedBox(height: 16),
++            Text(
++              "التشخيص:",
++              style: TextStyle(
++                fontSize: 20,
++                fontWeight: FontWeight.bold,
++                color: Colors.deepPurple.shade700,
++              ),
++            ),
++            const SizedBox(height: 8),
++            Container(
++              width: double.infinity,
++              padding: const EdgeInsets.all(12),
++              decoration: BoxDecoration(
++                color: Colors.deepPurple.shade50,
++                borderRadius: BorderRadius.circular(10),
++              ),
++              child: Text(
++                diagnosis,
++                style: TextStyle(
++                  fontSize: 16,
++                  color: Colors.deepPurple.shade900,
++                ),
+               ),
+             ),
+-          ),
++          ],
+         ),
+       ),
+     );
+Index: pubspec.yaml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/pubspec.yaml b/pubspec.yaml
+--- a/pubspec.yaml	(revision f038e1a45d9055f7518dec6c088e16bdaafb2506)
++++ b/pubspec.yaml	(date 1749026419361)
+@@ -61,8 +61,8 @@
+   uses-material-design: true
+ 
+   # To add assets to your application, add an assets section, like this:
+-  # assets:
+-  #   - images/a_dot_burr.jpeg
++  assets:
++     - assets/download.png
+   #   - images/a_dot_ham.jpeg
+ 
+   # An image asset can refer to one or more resolution-specific "variants", see
+Index: lib/settings_page.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/settings_page.dart b/lib/settings_page.dart
+new file mode 100644
+--- /dev/null	(date 1749029981636)
++++ b/lib/settings_page.dart	(date 1749029981636)
+@@ -0,0 +1,60 @@
++// settings_page.dart
++import 'package:flutter/material.dart';
++
++class SettingsPage extends StatelessWidget {
++  const SettingsPage({super.key});
++
++  @override
++  Widget build(BuildContext context) {
++    return Scaffold(
++      appBar: AppBar(
++        elevation: 0,
++        backgroundColor: const Color(0xFFE3F2FD),
++        automaticallyImplyLeading: false,
++        title: Container(
++          padding: const EdgeInsets.only(bottom: 10,right: 20),
++          child: Row(
++            mainAxisAlignment: MainAxisAlignment.spaceBetween,
++            children: [
++              // زر الرجوع على اليسار
++              IconButton(
++                icon: const Icon(Icons.arrow_back, color: Color(0xFF0D47A1)),
++                onPressed: () {
++                  Navigator.pop(context);
++                },
++              ),
++
++              // العنوان في المنتصف
++              const Text(
++                "Settings",
++                style: TextStyle(
++                  fontWeight: FontWeight.bold,
++                  fontSize: 25,
++                  color: Color(0xFF0D47A1),
++                ),
++              ),
++
++            ],
++          ),
++        ),
++      ),
++      body: ListView(
++        padding: const EdgeInsets.all(16),
++        children: const [
++          ListTile(
++            leading: Icon(Icons.color_lens),
++            title: Text("Colar"),
++          ),
++          ListTile(
++            leading: Icon(Icons.language),
++            title: Text("Language"),
++          ),
++          ListTile(
++            leading: Icon(Icons.info),
++            title: Text("About"),
++          ),
++        ],
++      ),
++    );
++  }
++}
+Index: lib/main.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/main.dart b/lib/main.dart
+--- a/lib/main.dart	(revision f038e1a45d9055f7518dec6c088e16bdaafb2506)
++++ b/lib/main.dart	(date 1749028773226)
+@@ -1,4 +1,7 @@
+ //main.dart
++import 'package:analysis_project/settings_page.dart';
++
++import 'profile_page.dart';
+ import 'package:flutter/material.dart';
+ import 'medical_test_page.dart';
+ import 'xray_page.dart';
+@@ -17,28 +20,65 @@
+       home: DefaultTabController(
+         length: 2,
+         child: Scaffold(
+-          appBar: AppBar(
+-            elevation: 0,
+-            backgroundColor: const Color(0xFFE3F2FD),
+-            centerTitle: true,
+-            title: const Text(
+-              "",
+-              style: TextStyle(
+-                fontWeight: FontWeight.bold,
+-                fontSize: 20,
+-                color: Color(0xFF0D47A1),
+-              ),
+-            ),
+-            bottom: const TabBar(
+-              indicatorColor: Color(0xFF0D47A1),
+-              labelColor: Color(0xFF0D47A1),
+-              unselectedLabelColor: Colors.grey,
+-              tabs: [
+-                Tab(text: "Medical Reports"),
+-                Tab(text: "X-Rays"),
+-              ],
+-            ),
+-          ),
++            appBar: AppBar(
++              elevation: 0,
++              backgroundColor: const Color(0xFFE3F2FD),
++              automaticallyImplyLeading: false,
++              title: Row(
++                mainAxisAlignment: MainAxisAlignment.spaceBetween,
++                children: [
++                  // زر الإعدادات على اليسار
++                  Builder(
++                  builder: (context) => IconButton(
++                    icon: const Icon(Icons.settings, color: Color(0xFF0D47A1)),
++                    onPressed: () {
++                      Navigator.push(
++                        context,
++                        MaterialPageRoute(builder: (context) => const SettingsPage()),
++                      );
++                      },
++                  ),
++                  ),
++                  // العنوان في النص
++                  const Text(
++                    "Home",
++                    style: TextStyle(
++                      fontWeight: FontWeight.bold,
++                      fontSize: 25,
++                      color: Color(0xFF0D47A1),
++                    ),
++                  ),
++
++                  // صورة البروفايل على اليمين
++                  Builder(
++                    builder: (context) => GestureDetector(
++                      onTap: () {
++                        Navigator.push(
++                          context,
++                          MaterialPageRoute(builder: (context) => const ProfilePage()),
++                        );
++                      },
++                      child: const CircleAvatar(
++                        radius: 25,
++                        backgroundImage: AssetImage('assets/download.png'),
++                        backgroundColor: Colors.transparent,
++                      ),
++                    ),
++                  ),
++
++
++                ],
++              ),
++              bottom: const TabBar(
++                indicatorColor: Color(0xFF0D47A1),
++                labelColor: Color(0xFF0D47A1),
++                unselectedLabelColor: Colors.grey,
++                tabs: [
++                  Tab(text: "Medical Reports"),
++                  Tab(text: "X-Rays"),
++                ],
++              ),
++            ),
+           body: Container(
+             decoration: const BoxDecoration(
+               gradient: LinearGradient(
+Index: lib/profile_page.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/profile_page.dart b/lib/profile_page.dart
+new file mode 100644
+--- /dev/null	(date 1749028959788)
++++ b/lib/profile_page.dart	(date 1749028959788)
+@@ -0,0 +1,59 @@
++// profile_page.dart
++import 'package:flutter/material.dart';
++
++class ProfilePage extends StatelessWidget {
++  const ProfilePage({super.key});
++
++  @override
++  Widget build(BuildContext context) {
++    return Scaffold(
++        appBar: AppBar(
++        elevation: 0,
++        backgroundColor: const Color(0xFFE3F2FD),
++    automaticallyImplyLeading: false,
++    title: Container(
++      padding: EdgeInsets.only(bottom: 10),
++      child: Row(
++      mainAxisAlignment: MainAxisAlignment.spaceBetween,
++      children: [
++      // زر الإعدادات على اليسار
++        IconButton(
++          icon: const Icon(Icons.arrow_back, color: Color(0xFF0D47A1)),
++          onPressed: () {
++            Navigator.pop(context);
++          },
++        ),
++
++
++        // العنوان في النص
++      const Text(
++      "Profile",
++      style: TextStyle(
++      fontWeight: FontWeight.bold,
++      fontSize: 25,
++      color: Color(0xFF0D47A1),
++      ),
++      ),
++
++      // صورة البروفايل على اليمين
++      GestureDetector(
++      child: const CircleAvatar(
++      radius: 25,
++      backgroundImage: AssetImage('assets/download.png'),
++      backgroundColor: Colors.transparent,
++      ),
++      ),
++      ],
++      ),
++    ),
++        ),
++
++    body: const Center(
++        child: Text(
++          "معلومات المريض هنا",
++          style: TextStyle(fontSize: 18),
++        ),
++      ),
++    );
++  }
++}
